@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "AmericoDraws"
+version = "0.1.0"
+description = "A library for processing images for robotic drawing"
+readme = "README.md"
+authors = [
+    {name = "Lucas Dantas de Oliveira", email = "lucasddoliveira1@gmail.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "numpy>=1.19.0",
+    "matplotlib>=3.3.0",
+    "opencv-python>=4.5.0",
+    "Pillow>=8.0.0",
+    "scikit-learn>=0.24.0",
+    "networkx>=2.5.0",
+    "rembg>=2.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/robotic_drawer"
+"Bug Tracker" = "https://github.com/yourusername/robotic_drawer/issues"
