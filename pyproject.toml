@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "AmericoDraws"
-version = "0.1.0"
-description = "A library for processing images for robotic drawing"
+version = "0.1.4"
+description = "Convert images into 3D drawing paths suitable for robotic arms."
 readme = "README.md"
 authors = [
     {name = "Lucas Dantas de Oliveira", email = "lucasddoliveira1@gmail.com"}
@@ -28,5 +28,5 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/robotic_drawer"
-"Bug Tracker" = "https://github.com/yourusername/robotic_drawer/issues"
+"Homepage" = "https://github.com/lucasddoliveira/AmericoDraws"
+"Bug Tracker" = "https://github.com/lucasddoliveira/AmericoDraws/issues"

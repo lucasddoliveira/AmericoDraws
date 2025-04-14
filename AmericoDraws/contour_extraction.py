@@ -57,13 +57,15 @@ def erode_alpha(image, pixels=1):
     return Image.fromarray(data)
 
 
-def remove_background_ai(input_path, output_path=None):
+def remove_background_ai(input_path, output_path=None, threshold=10, erode_pixels=1):
     """
     Remove background from an image using AI.
     
     Args:
         input_path (str): Path to input image
         output_path (str, optional): Path to save background-removed image
+        threshold (int): Threshold for cleaning alpha edges
+        erode_pixels (int): Number of pixels to erode from alpha channel
         
     Returns:
         str: Path to the background-removed image
@@ -71,8 +73,8 @@ def remove_background_ai(input_path, output_path=None):
     with open(input_path, "rb") as inp_file:
         img = Image.open(io.BytesIO(inp_file.read()))
         img_no_bg = rembg_remove(img)
-        img_no_bg = clean_alpha_edges(img_no_bg)
-        img_no_bg = erode_alpha(img_no_bg, pixels=1)
+        img_no_bg = clean_alpha_edges(img_no_bg, threshold=threshold)
+        img_no_bg = erode_alpha(img_no_bg, pixels=erode_pixels)
         
         if output_path:
             img_no_bg.save(output_path, "PNG")
@@ -99,18 +101,18 @@ def extract_contours(image_path, threshold1=120, threshold2=191, blur_size=3):
     """
     # Load the image in grayscale
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    
+        
     # Check image orientation
     height, width = image.shape
-    if height > width:  # If the image is vertical, rotate it 90 degrees
-        image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+    #if height > width:  # If the image is vertical, rotate it 90 degrees
+    #    image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
 
     # Flood fill from top-left corner to unify background
     flood_filled = image.copy()
     h, w = flood_filled.shape[:2]
-    mask = np.zeros((h + 2, w + 2), np.uint8)  # Mask needs to be 2 pixels larger
+    mask = np.zeros((h + 2, w + 2), np.uint8)  # Mask needs to be 2 pixels larger than the image
     cv2.floodFill(flood_filled, mask, seedPoint=(0, 0), newVal=255)  # Flood with white
-    cv2.floodFill(flood_filled, mask, seedPoint=(0, 0), newVal=0)    # Then with black
+    cv2.floodFill(flood_filled, mask, seedPoint=(0, 0), newVal=0)    # Then flood with black
 
     # Apply Gaussian blur to reduce noise
     blurred = cv2.GaussianBlur(flood_filled, (blur_size, blur_size), 0)
@@ -127,40 +129,5 @@ def extract_contours(image_path, threshold1=120, threshold2=191, blur_size=3):
     # Draw contours with a single pixel width
     cv2.drawContours(contour_image, contours, -1, (0,), 1)
 
+    # Save result
     return image, edges, contours, contour_image
-
-
-def simplify_contours(contours, epsilon_factor=0.0001):
-    """
-    Simplify contours using Douglas-Peucker algorithm.
-    
-    Args:
-        contours (list): List of contours
-        epsilon_factor (float): Approximation accuracy as a percentage of perimeter
-        
-    Returns:
-        list: Simplified contours
-    """
-    simplified_contours = []
-    
-    for contour in contours:
-        # Calculate epsilon based on the perimeter of the contour
-        epsilon = epsilon_factor * cv2.arcLength(contour, True)
-        simplified = cv2.approxPolyDP(contour, epsilon, True)
-        simplified_contours.append(simplified)
-    
-    return simplified_contours
-
-
-def filter_contours(contours, min_length=10):
-    """
-    Filter out small contours.
-    
-    Args:
-        contours (list): List of contours
-        min_length (int): Minimum number of points in a contour
-        
-    Returns:
-        list: Filtered contours
-    """
-    return [cnt for cnt in contours if len(cnt) >= min_length]

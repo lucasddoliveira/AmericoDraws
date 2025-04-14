@@ -10,12 +10,14 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
 
 
-def visualization_3d(points, path_3d_filename=None, sketch_filename=None):
+def visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_filename=None, sketch_filename=None):
     """
     Visualize the 3D path with color-coded pen up/down movements.
     
     Args:
         points (list): List of points for robotic arm movement
+        upper_left_edge (tuple): Coordinates of the upper left edge (x, y, z)
+        bottom_right_edge (tuple): Coordinates of the bottom right edge (x, y, z) 
         path_3d_filename (str, optional): Filename to save 3D visualization
         sketch_filename (str, optional): Filename to save 2D sketch visualization
     """
@@ -71,7 +73,7 @@ def visualization_3d(points, path_3d_filename=None, sketch_filename=None):
     if path_3d_filename:
         plt.savefig(path_3d_filename, bbox_inches='tight', dpi=300)
     
-    # Create a top-down view for the 2D sketch
+    # Create a top-down view for the 2D sketch using the full frame from upper_left to bottom_right
     if sketch_filename:
         fig2 = plt.figure(figsize=(10, 10))
         ax2 = fig2.add_subplot(111)
@@ -81,11 +83,19 @@ def visualization_3d(points, path_3d_filename=None, sketch_filename=None):
             if pen_states[i] == 'down' and pen_states[i-1] == 'down':
                 ax2.plot([xs[i-1], xs[i]], [ys[i-1], ys[i]], 'b-', linewidth=1.0)
         
+        # Set the axis limits to match the provided frame edges
+        ax2.set_xlim(upper_left_edge[0], bottom_right_edge[0])
+        ax2.set_ylim(bottom_right_edge[1], upper_left_edge[1])  # Y-axis inverted for correct orientation
+        
+        # Add frame markers
+        ax2.plot(upper_left_edge[0], upper_left_edge[1], 'ro', markersize=8, label='Upper Left')
+        ax2.plot(bottom_right_edge[0], bottom_right_edge[1], 'mo', markersize=8, label='Bottom Right')
+        
         ax2.set_xlabel('X (mm)')
         ax2.set_ylabel('Y (mm)')
         ax2.set_title('Drawing Path (Top View)')
         ax2.set_aspect('equal')
-        ax2.invert_yaxis()  # Correct orientation
+        ax2.legend(loc='upper right')
         
         plt.savefig(sketch_filename, bbox_inches='tight', dpi=600)
         plt.close(fig2)

@@ -26,20 +26,11 @@ def process_image(input_path, cell_size=1):
     grid_rows = height // cell_size
     grid_cols = width // cell_size
     matrix = np.zeros((grid_rows, grid_cols), dtype=int)
-    
     for i in range(grid_rows):
         for j in range(grid_cols):
             # For cell_size=1, each cell is a single pixel
-            row_start = i * cell_size
-            col_start = j * cell_size
-            
-            # Take average of the cell area
-            cell_area = img_array[row_start:row_start+cell_size, 
-                                  col_start:col_start+cell_size]
-            avg_value = np.mean(cell_area) if cell_area.size > 0 else 255
-            
-            matrix[i, j] = 1 if avg_value < 128 else 0
-            
+            matrix[i, j] = 1 if img_array[i, j] < 128 else 0
+
     return matrix.tolist()
 
 
@@ -70,18 +61,17 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
     step_x = total_width / width
     step_y = total_height / height
     
-    # Prepare to collect points
+    # Prepare to collect points.
     points = []
     visited = set()
     
     def get_neighbors(i, j):
         # Only consider direct neighbors (up, down, left, right)
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        return [(i+di, j+dj) for di, dj in directions 
-                if 0 <= i+di < height and 0 <= j+dj < width]
+        return [(i+di, j+dj) for di, dj in directions if 0 <= i+di < height and 0 <= j+dj < width]
     
     def trace_sequence(i, j):
-        # Use BFS to ensure connected components stay together
+        # Use BFS instead of DFS to ensure connected components stay together
         queue = [(i, j)]
         sequence = []
         local_visited = set([(i, j)])  # Track visited cells for this sequence
@@ -159,9 +149,6 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
     # Apply line simplification to each sequence
     simplified_sequences = []
     for seq in sequences:
-        if not seq:
-            continue
-            
         points_only = [p[:2] for p in seq]  # Extract x,y coordinates
         simplified_points = simplify_line(points_only, epsilon)
         
@@ -177,8 +164,7 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
                     min_dist = dist
                     best_match = orig_point
             
-            simplified_seq.append([x, y, best_match[2], best_match[3], 
-                                  best_match[4], best_match[5]])
+            simplified_seq.append([x, y, best_match[2], best_match[3], best_match[4], best_match[5]])
         
         simplified_sequences.append(simplified_seq)
     
@@ -192,8 +178,7 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
             # Start with the first sequence
             next_seq = 0
             optimized_sequences.append(simplified_sequences[next_seq])
-            if simplified_sequences[next_seq]:
-                current_pos = simplified_sequences[next_seq][-1][:2]  # Just need x, y coords
+            current_pos = simplified_sequences[next_seq][-1][:2]  # Just need x, y coords
             remaining_sequences.remove(next_seq)
         else:
             # Find the closest sequence
@@ -201,8 +186,6 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
             next_seq = None
             
             for i in remaining_sequences:
-                if not simplified_sequences[i]:
-                    continue
                 start_dist = np.sqrt((current_pos[0] - simplified_sequences[i][0][0])**2 + 
                                     (current_pos[1] - simplified_sequences[i][0][1])**2)
                 
@@ -210,21 +193,13 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
                     min_dist = start_dist
                     next_seq = i
             
-            if next_seq is not None:
-                optimized_sequences.append(simplified_sequences[next_seq])
-                if simplified_sequences[next_seq]:
-                    current_pos = simplified_sequences[next_seq][-1][:2]
-                remaining_sequences.remove(next_seq)
-            else:
-                # No valid next sequence found
-                break
+            optimized_sequences.append(simplified_sequences[next_seq])
+            current_pos = simplified_sequences[next_seq][-1][:2]
+            remaining_sequences.remove(next_seq)
     
     # Create the final path with pen up/down movements
     path = []
     for seq in optimized_sequences:
-        if not seq:
-            continue
-            
         if path:
             # Get the last point's coordinates
             last_x, last_y, last_z, last_a, last_e, last_r = path[-1]
@@ -244,16 +219,9 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
             else:
                 # Direct movement to the next sequence (pen down)
                 path.append([new_x, new_y, seq[0][2], seq[0][3], seq[0][4], seq[0][5]])
-        else:
-            # First point in the path, start with pen up and then down
-            first_x, first_y, first_z, first_a, first_e, first_r = seq[0]
-            # Start position with pen up
-            path.append([first_x, first_y, first_z + z_up, first_a, first_e, first_r])
-            # Lower the pen
-            path.append([first_x, first_y, first_z, first_a, first_e, first_r])
         
         # Add the current sequence
-        path.extend(seq[1:])  # Skip the first point as we already added it
+        path.extend(seq)
     
     # Make sure we end with pen up
     if path:
@@ -266,5 +234,5 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
     for item in path:
         if not result or item != result[-1]:
             result.append(item)
-    
+
     return result

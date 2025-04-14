@@ -1,8 +1,17 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
     name="AmericoDraws",
-    version="0.1.0",
+    version="0.1.4",
+    author="Lucas Dantas",
+    author_email="lucasddoliveira1@gmail.com",
+    description="Convert images into 3D drawing paths suitable for robotic arms.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/lucasddoliveira/AmericoDraws",
     packages=find_packages(),
     install_requires=[
         "numpy>=1.19.0",
@@ -14,4 +23,11 @@ setup(
         "rembg>=2.0.0",
     ],
     python_requires=">=3.7",
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",  # or whatever you use
+        "Operating System :: OS Independent",
+        "Intended Audience :: Developers",
+        "Topic :: Scientific/Engineering :: Image Recognition",
+    ],
 )
