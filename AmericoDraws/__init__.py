@@ -5,7 +5,7 @@ This library provides tools to convert images into 3D drawing paths
 suitable for robotic arms.
 """
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 __author__ = 'Lucas Dantas'
 
 # Import main functions for easy access

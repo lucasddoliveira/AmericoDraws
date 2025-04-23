@@ -52,6 +52,8 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
     Returns:
         list: Optimized list of points for robotic arm movement
     """
+    import numpy as np
+    
     height = len(matrix)
     width = len(matrix[0]) if height > 0 else 0
 
@@ -177,6 +179,7 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
         if current_pos is None:
             # Start with the first sequence
             next_seq = 0
+            # Add the first sequence as is
             optimized_sequences.append(simplified_sequences[next_seq])
             current_pos = simplified_sequences[next_seq][-1][:2]  # Just need x, y coords
             remaining_sequences.remove(next_seq)
@@ -184,18 +187,76 @@ def create_points_array(matrix, cell_width, upper_left_edge, bottom_right_edge,
             # Find the closest sequence
             min_dist = float('inf')
             next_seq = None
+            seq_should_reverse = False
             
             for i in remaining_sequences:
+                # Check distance to the start of the sequence
                 start_dist = np.sqrt((current_pos[0] - simplified_sequences[i][0][0])**2 + 
                                     (current_pos[1] - simplified_sequences[i][0][1])**2)
                 
+                # Check distance to the end of the sequence
+                end_dist = np.sqrt((current_pos[0] - simplified_sequences[i][-1][0])**2 + 
+                                  (current_pos[1] - simplified_sequences[i][-1][1])**2)
+                
+                # Choose the closest end of the sequence
                 if start_dist < min_dist:
                     min_dist = start_dist
                     next_seq = i
+                    seq_should_reverse = False
+                
+                if end_dist < min_dist:
+                    min_dist = end_dist
+                    next_seq = i
+                    seq_should_reverse = True
             
-            optimized_sequences.append(simplified_sequences[next_seq])
-            current_pos = simplified_sequences[next_seq][-1][:2]
+            # Reverse the sequence if needed to start from the closest end
+            if seq_should_reverse:
+                optimized_sequences.append(simplified_sequences[next_seq][::-1])
+            else:
+                optimized_sequences.append(simplified_sequences[next_seq])
+            
+            # Update current position to the last point of the added sequence
+            current_pos = optimized_sequences[-1][-1][:2]
             remaining_sequences.remove(next_seq)
+    
+    # Now optimize points within each sequence
+    for i in range(len(optimized_sequences)):
+        # Skip sequences with less than 3 points (no reordering needed)
+        if len(optimized_sequences[i]) < 3:
+            continue
+        
+        # Extract first and last point - they should remain first and last
+        first_point = optimized_sequences[i][0]
+        remaining_points = optimized_sequences[i][1:]
+        
+        # Create optimized path starting from the first point
+        optimized_path = [first_point]
+        remaining_indices = list(range(len(remaining_points)))
+        
+        current_point = first_point
+        while remaining_indices:
+            # Find closest remaining point
+            min_dist = float('inf')
+            closest_idx = None
+            
+            for idx in remaining_indices:
+                point = remaining_points[idx]
+                dist = np.sqrt((current_point[0] - point[0])**2 + (current_point[1] - point[1])**2)
+                
+                if dist < min_dist:
+                    min_dist = dist
+                    closest_idx = idx
+            
+            # Add closest point to optimized path
+            closest_point = remaining_points[closest_idx]
+            optimized_path.append(closest_point)
+            
+            # Update current point and remove added point from remaining
+            current_point = closest_point
+            remaining_indices.remove(closest_idx)
+        
+        # Replace original sequence with optimized one
+        optimized_sequences[i] = optimized_path
     
     # Create the final path with pen up/down movements
     path = []

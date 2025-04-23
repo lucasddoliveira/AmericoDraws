@@ -33,7 +33,9 @@ def independencia_ou_morte(
     blur_size=3,
     # Path optimization parameters
     distance_threshold=3,
-    epsilon=0.25
+    epsilon=0.25,
+    # Final Result Image
+    linewidth=1
 ):
     """
     Process an image and generate robot arm drawing paths.
@@ -55,6 +57,7 @@ def independencia_ou_morte(
         blur_size (int): Size of Gaussian blur kernel for edge detection
         distance_threshold (int): Threshold for filtering points based on distance
         epsilon (float): Epsilon value for Douglas-Peucker algorithm for path simplification
+        linewidth (int): Line width of the final result
         
     Returns:
         list: List of points representing the robot path
@@ -115,7 +118,7 @@ def independencia_ou_morte(
     )
     
     # Step 5: Always visualize and save results
-    visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_path, sketch_path)
+    visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_path, sketch_path, linewidth)
     save_robot_commands(points, robot_commands_path)
     
     return points

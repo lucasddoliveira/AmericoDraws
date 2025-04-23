@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="AmericoDraws",
-    version="0.1.4",
+    version="0.1.5",
     author="Lucas Dantas",
     author_email="lucasddoliveira1@gmail.com",
     description="Convert images into 3D drawing paths suitable for robotic arms.",

@@ -3,16 +3,12 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-# Define your input/output paths
-input_image = "examples/2/input.png"
-output_directory = "examples/2/output"
-
 from AmericoDraws import independencia_ou_morte
 
 # Call the function
 points = independencia_ou_morte(
-    input_image,
-    output_directory,
+    input_path = "examples/2/input.png",
+    output_dir="examples/2/output",
     process_cell_size=1,
     points_cell_width=1,
     upper_left_edge=None,

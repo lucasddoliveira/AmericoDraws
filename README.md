@@ -88,7 +88,8 @@ independencia_ou_morte(
     threshold2=191,         # Segundo limiar para detecção de bordas Canny
     blur_size=3,            # Tamanho do kernel para blur Gaussiano
     distance_threshold=3,   # Limiar de distância para filtrar pontos
-    epsilon=0.25            # Valor epsilon para algoritmo Douglas-Peucker
+    epsilon=0.25,           # Valor epsilon para algoritmo Douglas-Peucker
+    linewidth=1             # Grossura da linha do resultado final
 )
 ```
 
@@ -262,7 +263,8 @@ independencia_ou_morte(
     threshold2=191,         # Second Canny edge detection threshold
     blur_size=3,            # Kernel size for Gaussian blur
     distance_threshold=3,   # Distance threshold for point filtering
-    epsilon=0.25            # Epsilon value for Douglas-Peucker algorithm
+    epsilon=0.25,           # Epsilon value for Douglas-Peucker algorithm
+    linewidth=1             # Line width of the final result
 )
 ```
 

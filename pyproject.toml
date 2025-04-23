@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "AmericoDraws"
-version = "0.1.4"
+version = "0.1.5"
 description = "Convert images into 3D drawing paths suitable for robotic arms."
 readme = "README.md"
 authors = [

@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
 
 
-def visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_filename=None, sketch_filename=None):
+def visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_filename=None, sketch_filename=None, linewidth=1):
     """
     Visualize the 3D path with color-coded pen up/down movements.
     
@@ -20,6 +20,7 @@ def visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_filenam
         bottom_right_edge (tuple): Coordinates of the bottom right edge (x, y, z) 
         path_3d_filename (str, optional): Filename to save 3D visualization
         sketch_filename (str, optional): Filename to save 2D sketch visualization
+        linewidth (int, optional): Line width of the final result
     """
     if not points:
         return
@@ -27,11 +28,12 @@ def visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_filenam
     # Extract x, y, z coordinates
     xs = [point[0] for point in points]
     ys = [point[1] for point in points]
-    zs = [point[2] for point in points]
-    
+    zs = [abs(point[2]) for point in points]
+
     # Determine pen state for each point (up/down)
-    base_z = points[0][2]
-    pen_states = ['up' if point[2] > base_z else 'down' for point in points]
+    base_z = abs(points[0][2])
+
+    pen_states = ['up' if abs(point[2]) > base_z else 'down' for point in points]
     
     # Create colormap: blue for pen down, red for pen up
     colors = ['b' if state == 'down' else 'r' for state in pen_states]
@@ -81,7 +83,7 @@ def visualization_3d(points, upper_left_edge, bottom_right_edge, path_3d_filenam
         # Plot only pen-down segments for the sketch
         for i in range(1, len(points)):
             if pen_states[i] == 'down' and pen_states[i-1] == 'down':
-                ax2.plot([xs[i-1], xs[i]], [ys[i-1], ys[i]], 'b-', linewidth=1.0)
+                ax2.plot([xs[i-1], xs[i]], [ys[i-1], ys[i]], 'b-', linewidth=linewidth)
         
         # Set the axis limits to match the provided frame edges
         ax2.set_xlim(upper_left_edge[0], bottom_right_edge[0])
